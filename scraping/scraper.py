@@ -90,8 +90,11 @@ def main():
 		sys.stdout.write("{0:.2%} complete.\r".format((k-range_min)/diff))
 		sys.stdout.flush()
 
+
+	dt_now = datetime.datetime.now().strftime("%s")
+
 	for data,filename in zip([curators,campaigns,rewards],['curators','campaigns','rewards']):
-		data.to_csv(filename+"_"+datetime.datetime.now().strftime("%s")+'.csv',index=False)
+		data.to_csv(filename+"_"+dt_now+'.csv',index=False)
 
 	sys.stdout.write("Done.              \n")
 
