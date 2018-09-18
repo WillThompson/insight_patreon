@@ -51,52 +51,50 @@ def main():
 
 	# Set the parameters for your call to the API
 	REQUEST_BASE = "https://api.patreon.com/campaigns/{}"
+	path_to_data = "../data/"
 
-	
-	diff = int(sys.argv[1])
-	if len(sys.argv) == 2:
-		# Minimum campaign id as determined by initial crawl
-		CAMPAIGN_ID_MIN = 69658
-		range_min = CAMPAIGN_ID_MIN
-	else:
-		range_min = int(sys.argv[2])
+	# Set the arguments
+	diff = 10000
+	range_min = int(sys.argv[1])
 
+	while 1 > 0:
 
-	curators = pd.DataFrame()
-	campaigns = pd.DataFrame()
-	rewards = pd.DataFrame()
+		curators = pd.DataFrame()
+		campaigns = pd.DataFrame()
+		rewards = pd.DataFrame()
 
-	for k in range(range_min,range_min + diff):
+		for k in range(range_min,range_min + diff):
 
-		url = REQUEST_BASE.format(str(k))
-		myResponse = requests.get(url)
-		if(myResponse.ok):
-			# Covert the .json data to a dictionary.
-			dictionary = json.loads(myResponse.content)
-			
-			# handle data that has been downloaded.
-			cur,cpn,rwd = get_parsed_data(dictionary)
+			url = REQUEST_BASE.format(str(k))
+			myResponse = requests.get(url)
+			if(myResponse.ok):
+				# Covert the .json data to a dictionary.
+				dictionary = json.loads(myResponse.content)
+				
+				# handle data that has been downloaded.
+				cur,cpn,rwd = get_parsed_data(dictionary)
 
-			# manually add the campaign_id to all entries.
-			cur['campaign_id'] = k
-			cpn['campaign_id'] = k
-			rwd['campaign_id'] = k
-			
-			# append the data to the dataframe
-			curators = curators.append([cur])
-			campaigns = campaigns.append([cpn])
-			rewards = rewards.append([rwd])
+				# manually add the campaign_id to all entries.
+				cur['campaign_id'] = k
+				cpn['campaign_id'] = k
+				rwd['campaign_id'] = k
+				
+				# append the data to the dataframe
+				curators = curators.append([cur])
+				campaigns = campaigns.append([cpn])
+				rewards = rewards.append([rwd])
 
-		sys.stdout.write("{0:.2%} complete.\r".format((k-range_min)/diff))
-		sys.stdout.flush()
+			sys.stdout.write("{0:.2%} complete.\r".format((k-range_min)/diff))
+			sys.stdout.flush()
 
 
-	dt_now = datetime.datetime.now().strftime("%s")
+		dt_now = datetime.datetime.now().strftime("%s")
 
-	for data,filename in zip([curators,campaigns,rewards],['curators','campaigns','rewards']):
-		data.to_csv(filename+"_"+dt_now+'.csv',index=False)
+		for data,filename in zip([curators,campaigns,rewards],['curators','campaigns','rewards']):
+			data.to_csv(path_to_data+filename+"_"+dt_now+'.csv',index=False)
 
-	sys.stdout.write("Done.              \n")
+		sys.stdout.write("Done. (UP TO {} CAPTURED.)\n".format(str(k)))
+		range_min = k+1
 
 
 if __name__ == '__main__':
