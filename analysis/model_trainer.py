@@ -6,6 +6,7 @@ import pickle
 export_dir = './model/'
 
 # Get the campaign_data
+print('Loading data ...')
 path_to_data = '../data/'
 campaign_regex = 'campaign'
 files = data_loader.get_files_matching_regex(path_to_data,campaign_regex)
@@ -13,8 +14,13 @@ filepaths = [path_to_data + f for f in files]
 
 campaign_data = data_loader.csvs_to_df(filepaths)
 
+# Also train only on non-empty summaries. Get the indices
+notnans = [i for i, x in enumerate(pd.isnull(summaries)) if not x]
+summaries = [summaries[x] for x in notnans]
+
 # Get the summaries and clean them
 summaries = [data_cleaner.clean_text(str(summ)) for summ in campaign_data.summary]
+
 
 # Perform the lda analysis
 
