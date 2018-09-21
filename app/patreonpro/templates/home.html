@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container page-content">
+<div class="row">
+	<div class="col-sm-12">
+    Please enter a campaign id number into the box below to see the prediction of success:
+    <br><br>
+    <form action="{{ url_for('home') }}" method="POST">
+    <div class="form-group row">
+      <label for="campaign_id" class="col-sm-3 col-form-label">
+      Campaign ID Number:</label>
+      <div class="col-sm-9">
+        <input type="text" class="form-control" id="cid" name="campaign_id" placeholder="cid">
+      </div>
+    </div>
+    <a><button type="submit" class="btn btn-primary"><b>Enter new information</b></button></a>
+	</form>
+  </div>
+</div>
+</div>
+
+{% endblock %}
