@@ -16,7 +16,7 @@ def get_files_matching_regex(path_to_files,file_regex):
 def csvs_to_df(filepaths,drop_duplicates = True):
 
 	if len(filepaths) > 0:
-		df = pd.read_csv(filepaths[1])
+		df = pd.read_csv(filepaths[0])
 
 		for f in filepaths[1:]:
 			df = df.append(pd.read_csv(f))

@@ -9,22 +9,16 @@ from sklearn.decomposition import LatentDirichletAllocation
 # Set the export directory
 export_dir = './model/'
 
-# Get the campaign_data
-print('Loading data ...')
-path_to_data = '../data/'
-campaign_regex = 'campaign'
-files = data_loader.get_files_matching_regex(path_to_data,campaign_regex)
-filepaths = [path_to_data + f for f in files]
-
-# Get the campaign_data and the summaries
-campaign_data = data_loader.csvs_to_df(filepaths)
+# Load the preprocessed campaign data
+campaign_data = pd.read_csv('campaigns_preprocessed.csv')
 
 # Get the summaries and clean them
-summaries = [data_cleaner.clean_text(str(summ)) for summ in campaign_data.summary]
+#summaries = [data_cleaner.clean_text(str(summ)) for summ in campaign_data.summary]
+summaries = campaign_data['summary']
 notblanks = [i for i, x in enumerate(pd.isnull(summaries)) if x != '']
 summaries = [summaries[x] for x in notblanks]
 
-summaries = summaries[:80000]
+summaries = summaries[:20000]
 
 # Perform the lda analysis
 
@@ -46,7 +40,7 @@ pickle.dump(tf_vectorizer,open(export_dir + 'lda_vectorizer.pickle','wb'))
 print('Dumping vectorizer tf ...')
 pickle.dump(tf,open(export_dir + 'lda_vectorizer_tf.pickle','wb'))
 
-print('Dumping vectorizer tf ...')
+print('Dumping feature names ...')
 pickle.dump(tf_feature_names,open(export_dir + 'lda_vectorizer_tf_fn.pickle','wb'))
 
 print('Creating and training LDA ...')
