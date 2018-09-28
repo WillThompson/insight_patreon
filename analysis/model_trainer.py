@@ -3,7 +3,7 @@ import data_loader
 import pickle
 import pandas as pd
 import numpy as np
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
 
 # Set the export directory
@@ -15,20 +15,21 @@ campaign_data = pd.read_csv('campaigns_preprocessed.csv')
 # Get the summaries and clean them
 #summaries = [data_cleaner.clean_text(str(summ)) for summ in campaign_data.summary]
 summaries = campaign_data['summary']
-notblanks = [i for i, x in enumerate(pd.isnull(summaries)) if x != '']
+notblanks = [i for i, x in enumerate(pd.isnull(summaries)) if not x]
 summaries = [summaries[x] for x in notblanks]
 
-summaries = summaries[:20000]
+# Take only the first thousand summaries
+summaries = summaries[:200000]
 
 # Perform the lda analysis
 
-num_features = 2000
+num_features = 40000
 num_topics = 40
 
 print('Creating vectorizer ...')
-tf_vectorizer = CountVectorizer(
-	max_df=0.95, 
-	min_df=2, 
+tf_vectorizer = TfidfVectorizer(
+	max_df=0.3, 
+	min_df=0.01, 
 	max_features=num_features, 
 	stop_words='english')
 tf = tf_vectorizer.fit_transform(summaries)

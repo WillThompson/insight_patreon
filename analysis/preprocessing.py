@@ -25,7 +25,7 @@ def main():
 	campaigns['creation_rate'] = campaigns['creation_count']/days_since_creation(campaigns['created_at'])
 
 	campaigns['summary'].loc[pd.isnull(campaigns['summary'])] = ''
-	campaigns['summary'] = [data_cleaner.clean_text(x) for x in campaigns['summary']]
+	#campaigns['summary'] = [data_cleaner.clean_text(x) for x in campaigns['summary']]
 
 	# Get the campaign dataframe as a start
 	df = campaigns.set_index('campaign_id')

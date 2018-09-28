@@ -9,56 +9,57 @@ from sklearn.decomposition import LatentDirichletAllocation
 # Set the export directory
 export_dir = './model/'
 
-# Get the campaign_data
+# Get the pre-processed data
 print('Loading data ...')
-path_to_data = '../data/'
-campaign_regex = 'campaign'
-files = data_loader.get_files_matching_regex(path_to_data,campaign_regex)
-filepaths = [path_to_data + f for f in files]
+data = pd.read_csv('preprocessed_data.csv')
 
-campaign_data = data_loader.csvs_to_df(filepaths)
-campaign_data = campaign_data.set_index('campaign_id')
+# Get the data that is useful to me.
+# i.e. Where the earnings are public and there is a summary of the project
+dat = data[(data.earnings_visibility == 'public') & (pd.isnull(data.summary) == False)]
 
-reduced_data = campaign_data[['created_at','published_at','creation_count','is_monthly','is_charged_immediately','display_patron_goals','earnings_visibility','summary','pledge_sum','patron_count']]
-
-# Define a crude metric of success
-reduced_data['success'] = (reduced_data['patron_count'] > 30) & (reduced_data['pledge_sum'] > 3000)
-
-dat = reduced_data[(reduced_data.earnings_visibility == 'public') & (pd.isnull(reduced_data.summary) == False)]
-
-from sklearn.ensemble import RandomForestClassifier
-import topic_classifier
-
+# Load the topic classifier
 print('Loading topic classifier from first model trainer ...')
 
+import topic_classifier
 tc = topic_classifier.topic_classifier()
 
-dat = reduced_data[(reduced_data.earnings_visibility == 'public') & (pd.isnull(reduced_data.summary) == False)]
+# Add the topic classification vectors to the dataframe
+print('joining topic classifications ...')
+
 topic_probabilities = tc.get_topic_probs(dat.summary)
 topProb = pd.DataFrame(topic_probabilities,columns=['topic'+str(k) for k in range(0,len(topic_probabilities[0]))])
 topProb['campaign_id'] = dat.index
 topProb = topProb.set_index('campaign_id')
 dat = dat.join(topProb)
-e = dat.pop('earnings_visibility')
 
-dat['is_train'] = np.random.uniform(0, 1, len(dat)) <= .75
+
+# Define a crude metric of success
+# Assign the labels for success as you see them
+dat['success_class'] = 0
+dat.loc[dat['pledge_sum'] > 100,'success_class'] = 1
+dat.loc[dat['pledge_sum'] > 1000,'success_class'] = 2
+dat.loc[dat['pledge_sum'] > 10000,'success_class'] = 3
+dat.loc[dat['pledge_sum'] > 100000,'success_class'] = 4
+
+# Separate the data into a training and test set
+dat['is_train'] = np.random.uniform(0, 1, len(dat)) <= .80
 train, test = dat[dat['is_train']==True], dat[dat['is_train']==False]
 
-print('Number of observations in the training data:', len(train))
-print('Number of observations in the test data:',len(test))
-
-cols = [2,3,4,5]+list(range(10,50))
+# Define which variables to train the random forest on.
+cols = [2] + [8,9,10,11] + list(range(23,68))
 features = dat.columns[cols]
 
-y = pd.factorize(train['success'])[0]
-y = 1 - y
-
 # Create a random forest Classifier. By convention, clf means 'Classifier'
+# Train the Classifier.
+print('training classifier...')
+from sklearn.ensemble import RandomForestClassifier
 clf = RandomForestClassifier(n_jobs=2, random_state=0)
 
-# Train the Classifier.
-clf.fit(train[features], y)
+y = pd.factorize(train['success_class'],sort = True)
+clf.fit(train[features], y[0])
 print('Dumping classifier ...')
 pickle.dump(clf,open(export_dir + 'clf.pickle','wb'))
+
+print('Done!')
 
 

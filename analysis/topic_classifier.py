@@ -5,10 +5,11 @@ class topic_classifier:
 
 	def __init__(self):
 
+		# Load the appropriate pickle files from previous training.
 		lda = pickle.load(open('model/lda.pickle','rb'))
 		tf_vectorizer = pickle.load(open('model/lda_vectorizer.pickle','rb'))
 		tf = pickle.load(open('model/lda_vectorizer_tf.pickle','rb'))
-		tf_feature_names = pickle.load(open('model/lda_vectorizer_tf_fn.pickle','rb'))
+		tf_feature_names = tf_vectorizer.get_feature_names()
 
 		self.lda_model = lda
 		self.tf_vectorizer = tf_vectorizer
@@ -31,7 +32,7 @@ class topic_classifier:
 		mapped_summary = self.tf_vectorizer.transform(text)
 		topic_probs = self.lda_model.transform(mapped_summary)
 
-		return(topic_probs)
+		return(topic_probs[0])
 
 	def get_topic_probs_dictionary(self,text):
 
@@ -45,7 +46,7 @@ class topic_classifier:
 		q = sorted(top,reverse=True)
 		#if display:
 		#	for k in range(0,num_most_likely):
-				#print('{:.2%}: {}'.format(*q[k]))
+		#		print('{:.2%}: {}'.format(*list(q[k])))
 
 		return(q[:num_most_likely])
 

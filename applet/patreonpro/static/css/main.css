@@ -1,0 +1,147 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  color: #000000;
+  background-color: #FFFFFF
+}
+ 
+/*
+ * Create dark grey header with a white logo
+ */
+  
+header {
+  height: 35px;
+  width: 100%;
+  opacity: .9;
+  margin-bottom: 10px;
+}
+ 
+header h1.logo {
+  margin: 0;
+  font-size: 1.7em;
+  color: #fff;
+  text-transform: uppercase;
+  float: left;
+}
+ 
+header h1.logo:hover {
+  color: #fff;
+  text-decoration: none;
+}
+ 
+/*
+ *
+ */
+ 
+div.jumbo {
+  padding: 10px 0 30px 0;
+  background-color: #000000;
+  -webkit-border-radius: 10px;
+     -moz-border-radius: 10px;
+          border-radius: 10px;
+}
+
+.jumbotron {
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.jumbotron .display-1{
+  font-family: 'Racing Sans One', cursive;
+  color: #FFFFFF;
+  font-size: 28pt;
+}
+
+.jumbotron a{
+  color: #FFFFFF;
+}
+
+.jumbotron h1{
+  color: #FFFFFF;
+  font-size: 28pt;
+}
+
+h1{
+  font-family: 'Racing Sans One', cursive;
+  font-size: 20pt;
+}
+
+h2 {
+  font-size: 3em;
+  margin-top: 40px;
+  text-align: center;
+  letter-spacing: -2px;
+}
+ 
+h3 {
+  font-size: 1.7em;
+  font-weight: 100;
+  margin-top: 30px;
+  text-align: center;
+  letter-spacing: 0px;
+  color: #999;
+}
+
+/*
+ * Display navigation links inline
+ */
+
+.menu {
+  float: right;
+  margin-top: 8px;
+}
+ 
+.menu li {
+  display: inline;
+}
+ 
+.menu li + li {
+  margin-left: 35px;
+}
+ 
+.menu li a {
+  color: #999;
+  text-decoration: none;
+}
+
+.btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited, .btn-primary:focus {
+    border-color: #000000 !important; 
+    background-color: #000000!important;
+    color: #ffffff !important;
+}
+
+.container a {
+  color: #000000;
+}
+
+a:hover {
+  color: #ff69b4;
+  text-decoration: none;
+}
+
+
+.container p{
+  color: #000000;
+  font-family: 'Racing Sans One', cursive;
+}
+
+footer {
+  padding-left: 1em;
+}
+
+.container .page-content li{
+  margin-left: 0;
+}
+
+td, th{
+  padding-right: 2em;
+}
+
+td:last-child, th:last-child  {
+    padding-right: 0;
+}
+
+.flash{
+  color: #ff69b4;
+}

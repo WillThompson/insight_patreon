@@ -1,1 +1,0 @@
-from .patreonpro import app
