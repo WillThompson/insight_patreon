@@ -8,9 +8,13 @@
 		</div>
 		<div class="form col-sm-6">
 			<h3>Similar Campaigns</h3>
-			{% for pred in prediction %}
-				{{pred}}<br><br>
+
+			<table>
+				<tr><th>Campaign ID</th><th>Prob.</th></tr>
+			{% for x,y in prediction %}
+				<tr><td>{{y['curator_name']}}</td><td>{{y['creation_name']}}</td></tr>
 			{% endfor %}
+			</table>
 
 		</div>
 		<div class="form col-sm-6">

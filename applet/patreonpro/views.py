@@ -1,4 +1,4 @@
-from applet_new.patreonpro import app
+from applet.patreonpro import app
 
 from flask import Flask, flash, redirect, render_template, request, session, abort, url_for, g, flash
 import datetime
@@ -67,20 +67,26 @@ def render_prediction(campaign_id):
 	top_topics = tc.get_most_likely_topics(summary,3,display=False)	
 	topic_probs = tc.get_topic_probs(summary)
 
-	topic_prob_df = pd.DataFrame([{'topic'+str(k): topic_probs[k] for k in range(0,len(topic_probs))}]).set_index(entry.index)
+	n_topics = len(topic_probs)
+	topic_prob_df = pd.DataFrame([{'topic'+str(k): topic_probs[k] for k in range(0,n_topics)}]).set_index(entry.index)
 	e = entry.join(topic_prob_df)
 
 	# Load a dataframe with a sample set of campaigns that can be used to compare to
-	other_camps = pd.read_csv('sample_data.csv')
-	
-	dd = []
-	for k in range(0,1000):
-		vv = tc.get_topic_probs(other_camps.iloc[k].summary)
-		dd.append(jensen_shannon_distance(topic_probs,vv))
+	other_camps = pd.read_csv('dat2.csv')
+	topic_labels = ['topic'+str(k) for k in range(0,n_topics)]
+	n_comp = 3000
+	dd = [(0.0,0)]*n_comp
 
-	sorted_inds = np.argsort(dd)
+	v1 = np.array(topic_probs).astype('float')
+	inds = np.random.choice(len(other_camps), n_comp, replace=False)
+	for k in range(0,n_comp):
 
-	prediction_inds = [x for x in sorted_inds[0:3]]
-	prediction_topics = [tc.get_most_likely_topics(other_camps.iloc[x].summary,3,display=False) for x in prediction_inds]
+		v2 = np.array(other_camps.iloc[inds[k]][topic_labels]).astype('float')
+		dd[k] = (jensen_shannon_distance(v1,v2),inds[k])
 
-	return render_template('prediction.html', campaign_id=campaign_id, title=title, my_new_var=summary, top_topics=top_topics, prediction=prediction_topics)
+	sorted_inds = sorted(dd)
+	print(sorted_inds[0:5])
+	prediction_inds = [s[1] for s in sorted_inds[0:5]]
+	other_camps = other_camps.iloc[prediction_inds]
+
+	return render_template('prediction.html', campaign_id=campaign_id, title=title, my_new_var=summary, top_topics=top_topics, prediction=other_camps.iterrows())
