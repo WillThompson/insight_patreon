@@ -4,17 +4,13 @@
 <div class="container page-content">
 	<div class="row">
 		<div class="form col-sm-12">
-			<h1>{{campaign_id}}: {{title}}</h1>
+			<h1>{{campaign_info['curator']}} is creating {{campaign_info['creation_name']}}</h1>
 		</div>
 		<div class="form col-sm-6">
 			<h3>Similar Campaigns</h3>
-
-			<table>
-				<tr><th>Campaign ID</th><th>Prob.</th></tr>
 			{% for x,y in prediction %}
-				<tr><td>{{y['curator_name']}}</td><td>{{y['creation_name']}}</td></tr>
+				<b>{{y['curator']}}</b> is creating {{y['creation_name']}}<br>
 			{% endfor %}
-			</table>
 
 		</div>
 		<div class="form col-sm-6">
@@ -26,9 +22,11 @@
 				<tr><td>{{entry[1]}}</td><td>{{'{:.2%}'.format(entry[0])}}</td></tr>
 				{% endfor %}
 			</table>
+		</div>
+		<div class="form col-sm-12">
 
 			<h3>Written Summary</h3>
-			{{my_new_var|safe}}
+			{{campaign_info['summary']|safe}}
 
 		</div>
 	</div>

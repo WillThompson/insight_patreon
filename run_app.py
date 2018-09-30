@@ -1,2 +1,2 @@
-from applet_new.patreonpro import app
+from applet.patreonpro import app
 app.run(debug = True)
