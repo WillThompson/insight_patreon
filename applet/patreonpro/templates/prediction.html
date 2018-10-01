@@ -12,8 +12,6 @@
 				<b>{{y['curator']}}</b> is creating {{y['creation_name']}}<br>
 			{% endfor %}
 
-		</div>
-		<div class="form col-sm-6">
 			<h3>Topics</h3>
 
 			<table>
@@ -22,6 +20,30 @@
 				<tr><td>{{entry[1]}}</td><td>{{'{:.2%}'.format(entry[0])}}</td></tr>
 				{% endfor %}
 			</table>
+
+		</div>
+		<div class="form col-sm-6">
+			<h3>Stats</h3>
+
+			<!--<table>
+				<tr><th>Factor</th><th>Value</th></tr>
+				</tr>
+			</table>
+		-->
+
+			<h3>Pledge Sum Comparison</h3>
+
+			{% for plot in plots %}
+	        	{% for part in plot %}
+	        		{{part | safe}}
+	        	{% endfor %}
+	    	{% endfor %}
+
+	    	<table>
+				<tr><th>Factor</th><th>Value</th></tr>
+				<tr><td>Mean Pledge Sum</td><td>{{'${0:.2f}'.format(stats['mean_pledge_sum']/100)}}</td></tr>
+			</table>
+
 		</div>
 		<div class="form col-sm-12">
 

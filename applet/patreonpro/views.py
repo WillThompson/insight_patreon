@@ -6,9 +6,9 @@ import pandas as pd
 import numpy as np
 import patreon_requests
 import analysis.topic_classifier
+import analysis.campaign_comparison
 import tokenizer
 import scipy.stats as sp
-import pickle
 
 
 print('preparing topic classifier')
@@ -90,8 +90,17 @@ def render_prediction(campaign_id):
 	campaign_info['summary'] = summary
 
 	sorted_inds = sorted(dd)
-	print(sorted_inds[0:5])
 	prediction_inds = [s[1] for s in sorted_inds[0:5]]
+
+	n_compare = 1000
+	distances, stats_inds = [p[0] for p in sorted_inds[:n_compare]],[p[1] for p in sorted_inds[:n_compare]]
+	similar_campaigns = other_camps.iloc[stats_inds]
+	similar_campaigns['distance'] = distances
+
+
+	plots = [analysis.campaign_comparison.render_for_html(analysis.campaign_comparison.make_patron_vs_pledge_scatter(similar_campaigns,entry))]
+	stats = analysis.campaign_comparison.get_basic_statistics(similar_campaigns)
+
 	other_camps = other_camps.iloc[prediction_inds]
 
-	return render_template('prediction.html', campaign_info=campaign_info, top_topics=top_topics, prediction=other_camps.iterrows())
+	return render_template('prediction.html', campaign_info=campaign_info, top_topics=top_topics, prediction=other_camps.iterrows(),plots=plots,stats=stats)
