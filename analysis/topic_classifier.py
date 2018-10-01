@@ -3,16 +3,16 @@ import pickle
 
 class topic_classifier:
 
-	def __init__(self):
+	def __init__(self,lda_model_path,vectorizer_path,tf_path):
 
 		# Load the appropriate pickle files from previous training.
-		lda = pickle.load(open('model/lda.pickle','rb'))
-		tf_vectorizer = pickle.load(open('model/lda_vectorizer.pickle','rb'))
-		tf = pickle.load(open('model/lda_vectorizer_tf.pickle','rb'))
-		tf_feature_names = tf_vectorizer.get_feature_names()
+		lda = pickle.load(open(lda_model_path,'rb'))
+		vectorizer = pickle.load(open(vectorizer_path,'rb'))
+		tf = pickle.load(open(tf_path,'rb'))
+		tf_feature_names = vectorizer.get_feature_names()
 
 		self.lda_model = lda
-		self.tf_vectorizer = tf_vectorizer
+		self.vectorizer = vectorizer
 
 		def get_topics(model, feature_names, no_top_words):
 		    ll = list()
@@ -29,7 +29,7 @@ class topic_classifier:
 		if type(text) == str:
 			text = [text]
 
-		mapped_summary = self.tf_vectorizer.transform(text)
+		mapped_summary = self.vectorizer.transform(text)
 		topic_probs = self.lda_model.transform(mapped_summary)
 
 		return(topic_probs[0])
