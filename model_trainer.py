@@ -18,7 +18,7 @@ data = pd.read_csv('./analysis/preprocessed_data.csv')
 summs = data[~pd.isnull(data.summary)].summary
 
 # Take only the first few thousand summaries
-summaries = summs[:20000]
+summaries = summs[:60000]
 
 # import the code to generate the custom tokenizer
 import tokenizer
@@ -31,27 +31,27 @@ vectorizer = TfidfVectorizer(
 	tokenizer=tokenizer.prepare_text_for_lda, 
 	ngram_range=(1,1), 
 	max_df=0.3, 
-	min_df=0.01, 
+	min_df=0.005, 
 	max_features=num_features,
 	stop_words='english')
 
 tf = vectorizer.fit_transform(summaries)
 
 print('Dumping vectorizer ...')
-pickle.dump(vectorizer,open(export_dir + 'lda_vectorizer.pickle','wb'))
+pickle.dump(vectorizer,open(export_dir + 'lda_vectorizer_TEMP.pickle','wb'))
 
 print('Dumping vectorizer fit ...')
-pickle.dump(tf,open(export_dir + 'lda_vectorizer_tf.pickle','wb'))
+pickle.dump(tf,open(export_dir + 'lda_vectorizer_tf_TEMP.pickle','wb'))
 
 
 print('Creating and training LDA ...')
 # Create the LDA object and fit to transformed summaries
 
-num_topics = 15
+num_topics = 40
 
 lda = LatentDirichletAllocation(
     n_components=num_topics, 
-    max_iter=20, 
+    max_iter=60, 
     learning_method='batch', 
     learning_offset=50.,
     evaluate_every=2,
@@ -59,6 +59,6 @@ lda = LatentDirichletAllocation(
     random_state=0).fit(tf)
 
 print('Dumping LDA ...')
-pickle.dump(lda,open(export_dir + 'lda.pickle','wb'))
+pickle.dump(lda,open(export_dir + 'lda_TEMP.pickle','wb'))
 
 print("Done!")
