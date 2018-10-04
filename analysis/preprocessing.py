@@ -13,7 +13,8 @@ def days_since_creation(dates):
 def main():
 
 	# Load ALL the data into the campaigns DataFrame
-	path_to_files = '../data/'
+	print('loading data files ...')
+	path_to_files = './data/'
 	cmpn_reg = 'campaigns'
 	crtr_reg = 'curators'
 	rwrd_reg = 'rewards'
@@ -21,6 +22,7 @@ def main():
 	curators = data_loader.csvs_to_df([path_to_files + f for f in data_loader.get_files_matching_regex(path_to_files,crtr_reg)])
 	rewards = data_loader.csvs_to_df([path_to_files + f for f in data_loader.get_files_matching_regex(path_to_files,rwrd_reg)])
 
+	print('creating dataframe ...')
 	# Campaign data is loaded. Now it needs to be cleaned and preprocessed for the analysis stage
 	campaigns['creation_rate'] = campaigns['creation_count']/days_since_creation(campaigns['created_at'])
 
@@ -32,6 +34,7 @@ def main():
 
 	# Get the appropriate information from the curator page and add it to the df
 	df_temp = pd.DataFrame(curators['campaign_id'])
+	df_temp['curator'] = curators.full_name
 	df_temp['curatorHasYoutube'] = ~pd.isnull(curators.youtube)
 	df_temp['curatorHasTwitter'] = ~pd.isnull(curators.twitter)
 	df_temp = df_temp.set_index('campaign_id')
@@ -52,8 +55,12 @@ def main():
 	# join it up
 	df = df.join(df_temp)
 
+	# Do the topic modelling in the preprocessing of the data
+
+	print('writing dataframe to file ...')
 	df.to_csv('preprocessed_data.csv')
 
+	print('preprocessing complete.')
 
 if __name__ == '__main__':
 	main()
