@@ -4,53 +4,48 @@
 <div class="container page-content">
 	<div class="row">
 		<div class="form col-sm-12">
-			<h1>{{campaign_info['curator']}} is creating {{campaign_info['creation_name']}}</h1>
-		</div>
-		<div class="form col-sm-6">
-			<h3>Similar Campaigns</h3>
-			{% for x,y in prediction %}
-				<b>{{y['curator']}}</b> is creating {{y['creation_name']}}<br>
-			{% endfor %}
+			<h1>{{campaign_info['curator']}} is creating {{campaign_info['creation_name']}}</h1><br><br>
+			<p>Quick Comparison</p>
+			{% if not (quantile == -1) %}
+				{{'Your campaign is in the {:.0f}th percentile'.format(100*quantile) }}<br>
+			{% endif %}
 
-			<h3>Topics</h3>
+			<br>
+			<p>Significant Predictors of fundraising success</p>
+			<table>
+				<tr><th>Predictor</th><th>Campaign value</th><th>Mean for most successful</th></tr>
+			{% for bws in best_v_worst_stats.keys() %}
+				<tr><td>{{bws}}</td><td>{{campaign_info[bws]}}</td><td>{{best_v_worst_stats[bws][1]}} / {{best_v_worst_stats[bws][0]}}</td></tr>
+			{% endfor %}
+			</table>
+		</div>
+		<br><br>
+		<div class="form col-sm-12">
+			<p>Topics</p>
 
 			<table>
-				<tr><th>Keywords</th><th>Prob.</th></tr>
+				<tr><th>Keywords</th><th>Weight</th></tr>
 				{% for entry in top_topics %}
 				<tr><td>{{entry[1]}}</td><td>{{'{:.2%}'.format(entry[0])}}</td></tr>
 				{% endfor %}
 			</table>
-
+		</div>
+		<br><br>
+		<div class="form col-sm-6">
+			<p>Most Similar Campaigns</p>
+			
+			{% for sc1,sc2 in sim_camps %}
+				<b>{{sc2['curator']}}</b> is creating {{sc2['creation_name']}}<br>
+			{% endfor %}
 		</div>
 		<div class="form col-sm-6">
-			<h3>Stats</h3>
-
-			<!--<table>
-				<tr><th>Factor</th><th>Value</th></tr>
-				</tr>
-			</table>
-		-->
-
-			<h3>Pledge Sum Comparison</h3>
-
-			{% for plot in plots %}
-	        	{% for part in plot %}
-	        		{{part | safe}}
-	        	{% endfor %}
-	    	{% endfor %}
-
-	    	<table>
-				<tr><th>Factor</th><th>Value</th></tr>
-				<tr><td>Mean Pledge Sum</td><td>{{'${0:.2f}'.format(stats['mean_pledge_sum']/100)}}</td></tr>
-			</table>
-
+			<p>Similar Successful Campaigns</p>
+			
+			{% for sc1,sc2 in closest_of_the_best %}
+				<b>{{sc2['curator']}}</b> is creating {{sc2['creation_name']}}<br>
+			{% endfor %}
 		</div>
-		<div class="form col-sm-12">
 
-			<h3>Written Summary</h3>
-			{{campaign_info['summary']|safe}}
-
-		</div>
 	</div>
 </div>
 

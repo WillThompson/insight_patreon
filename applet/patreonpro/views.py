@@ -6,7 +6,9 @@ import pandas as pd
 import numpy as np
 import patreon_requests
 import analysis.topic_classifier
-import analysis.campaign_comparison
+import analysis.data_object
+import analysis.plots
+import analysis.pp_stats
 import tokenizer
 import scipy.stats as sp
 
@@ -16,6 +18,10 @@ tc = analysis.topic_classifier.topic_classifier(
 	'model/lda.pickle',
 	'model/lda_vectorizer.pickle',
 	'model/lda_vectorizer_tf.pickle')
+
+print('loading pre-processed data')
+ppdata = analysis.data_object.data_object(
+	'preprocessed_data_topics.csv')
 
 ## ROUTING
 @app.route('/',methods=['GET','POST'])
@@ -29,31 +35,22 @@ def home():
 
 	return render_template('home.html')
 
-# HELPER
-def jensen_shannon_distance(v1,v2):
-    
-    m = 0.5*(v1 + v2)
-    U = sp.entropy(v1, m, base=None)
-    V = sp.entropy(v2, m, base=None)
-    return(0.5*(U + V))
-
 
 @app.route('/<campaign_id>')
 def render_prediction(campaign_id):
 
+	# Query PATREON for information on the campaign
+	print('Calling PATREON for information on campaign {} ...'.format(campaign_id))
 	cur,cpn,rwd = patreon_requests.get_campaign_info_from_id(campaign_id)
 	entry = pd.DataFrame(cpn)
 
+	# If the campaign has no summary, then do not perform the comparison...
 	if(pd.isnull(entry.iloc[0].summary)):
 		flash('No summary included in campaign. Not enough information to group.')
 		return redirect(url_for('home'))
 
-	# Get pertinent info about the target campaign
-	campaign_info = {}
-	campaign_info['curator'] = cur.iloc[0]['full_name']
-	campaign_info['creation_name'] = entry.iloc[0]['creation_name']
-
-	# Compute some extra variables needed for later
+	# Add some extra variables needed for later
+	entry['curator'] = cur.iloc[0]['full_name']
 	entry['curatorHasYoutube'] = ~pd.isnull(cur.youtube)
 	entry['curatorHasTwitter'] = ~pd.isnull(cur.twitter)
 
@@ -64,43 +61,75 @@ def render_prediction(campaign_id):
 
 	## Pull the summary for analysis
 	print('preparing campaign {} summary text for LDA ...'.format(campaign_id))
-	summary = entry.iloc[0].summary
 
-	prepared_text = tokenizer.prepare_text_for_lda(summary)
-	top_topics = tc.get_most_likely_topics(summary,3,display=False)	
-	topic_probs = tc.get_topic_probs(summary)
+
+	## Tokenize the text
+	prepared_text = tokenizer.prepare_text_for_lda(entry.iloc[0]['summary'])
+	top_topics = tc.get_most_likely_topics(entry.iloc[0]['summary'],3,display=False)	
+	topic_probs = tc.get_topic_probs(entry.iloc[0]['summary'])
 
 	n_topics = len(topic_probs)
+	topic_labels = ['topic'+str(k) for k in range(0,n_topics)]
 	topic_prob_df = pd.DataFrame([{'topic'+str(k): topic_probs[k] for k in range(0,n_topics)}]).set_index(entry.index)
 	e = entry.join(topic_prob_df)
 
 	# Load a dataframe with a sample set of campaigns that can be used to compare to
-	topic_labels = ['topic'+str(k) for k in range(0,n_topics)]
-	n_comp = 10000
-	dd = [(0.0,0)]*n_comp
+	n_comp = 100000
+	all_campaigns = ppdata.get_dataframe()
+	inds = np.random.choice(len(all_campaigns), n_comp, replace=False)
 
-	other_camps = pd.read_csv('preprocessed_data_topics.csv')
-	v1 = np.array(topic_probs).astype('float')
-	inds = np.random.choice(len(other_camps), n_comp, replace=False)
-	for k in range(0,n_comp):
+	# Create a target and comparison dataframe to compare topics
+	target = topic_probs
+	comparison = all_campaigns.iloc[inds]
 
-		v2 = np.array(other_camps.iloc[inds[k]][topic_labels]).astype('float')
-		dd[k] = (jensen_shannon_distance(v1,v2),inds[k])
-
-	campaign_info['summary'] = summary
-
-	sorted_inds = sorted(dd)
+	print('getting sorted indices ...')
+	sorted_inds = analysis.pp_stats.get_sorted_indices_of_closest(target,comparison[topic_labels])
 	prediction_inds = [s[1] for s in sorted_inds[0:5]]
 
-	n_compare = 1000
+	# Get the cloest campaigns 'similar campaigns'
+	n_compare = 3000
 	distances, stats_inds = [p[0] for p in sorted_inds[:n_compare]],[p[1] for p in sorted_inds[:n_compare]]
-	similar_campaigns = other_camps.iloc[stats_inds]
+	similar_campaigns = comparison.iloc[stats_inds]
 	similar_campaigns['distance'] = distances
 
+	# Print the similar campaigns
+	print(similar_campaigns[['curator','distance']])
+	
+	campaigns_to_return = similar_campaigns.iloc[0:5].iterrows()
+	# Get the significant predictors
 
-	plots = [analysis.campaign_comparison.render_for_html(analysis.campaign_comparison.make_patron_vs_pledge_scatter(similar_campaigns,entry))]
-	stats = analysis.campaign_comparison.get_basic_statistics(similar_campaigns)
+	non_nulls = ~pd.isnull(similar_campaigns['pledge_sum'])
+	possible_predictors = ['creation_count',
+         'curatorHasTwitter',
+         'curatorHasYoutube',
+         'is_charged_immediately',
+         'is_monthly',
+         'is_nsfw',
+         'goal_count',
+         'reward_count']
+	target_variable = 'pledge_sum'
+	significant_predictors = analysis.pp_stats.get_significant_predictors(similar_campaigns[non_nulls],possible_predictors,[target_variable],significance_level=0.05)
 
-	other_camps = other_camps.iloc[prediction_inds]
+	# Get the statistics of the best v the worst campaigns
+	proportion = 0.10
 
-	return render_template('prediction.html', campaign_info=campaign_info, top_topics=top_topics, prediction=other_camps.iterrows(),plots=plots,stats=stats)
+	ranked_campaigns = similar_campaigns.sort_values(['pledge_sum'])
+	best_campaigns = ranked_campaigns.tail(int(np.round(proportion*n_compare)))
+	worst_campaigns = ranked_campaigns.head(int(np.round(proportion*n_compare)))
+
+	best_v_worst_stats = analysis.pp_stats.best_v_worst_stats(significant_predictors,best_campaigns,worst_campaigns)
+
+	quantile = analysis.pp_stats.get_quantile(similar_campaigns,e)
+
+	# Get the closest of the most successful campaigns to compare to.
+	closest_of_the_best = best_campaigns.sort_values(['distance']).iloc[0:5].iterrows()
+
+	return render_template('prediction.html', 
+		campaign_info=entry.iloc[0],
+		sim_camps = campaigns_to_return,
+		closest_of_the_best = closest_of_the_best, 
+		top_topics=top_topics,
+		significant_predictors=significant_predictors,
+		best_v_worst_stats = best_v_worst_stats,
+		quantile=quantile
+		)
