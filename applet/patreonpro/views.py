@@ -121,6 +121,8 @@ def render_prediction(campaign_id):
 
 	quantile = analysis.pp_stats.get_quantile(similar_campaigns,e)
 
+	recommendations = analysis.pp_stats.get_all_recommendations(significant_predictors,best_campaigns,worst_campaigns,entry)
+
 	# Get the closest of the most successful campaigns to compare to.
 	closest_of_the_best = best_campaigns.sort_values(['distance']).iloc[0:5].iterrows()
 
@@ -131,5 +133,6 @@ def render_prediction(campaign_id):
 		top_topics=top_topics,
 		significant_predictors=significant_predictors,
 		best_v_worst_stats = best_v_worst_stats,
-		quantile=quantile
+		quantile=quantile,
+		recommendations=recommendations
 		)

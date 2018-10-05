@@ -5,17 +5,22 @@
 	<div class="row">
 		<div class="form col-sm-12">
 			<h1>{{campaign_info['curator']}} is creating {{campaign_info['creation_name']}}</h1><br><br>
-			<p>Quick Comparison</p>
 			{% if not (quantile == -1) %}
-				{{'Your campaign is in the {:.0f}th percentile'.format(100*quantile) }}<br>
+			<p>Quick Comparison</p>
+				{{'Your campaign is in the {:.0f}th percentile'.format(100*quantile) }}<br><br>
 			{% endif %}
-
+			<p>Our recommendations</p>
+			{% for rec in recommendations %}
+			{{rec}}<br>
+			{% endfor %}
 			<br>
+
 			<p>Significant Predictors of fundraising success</p>
+
 			<table>
-				<tr><th>Predictor</th><th>Campaign value</th><th>Mean for most successful</th></tr>
+				<tr><th>Predictor</th><th>Campaign value</th><th>Mean for best</th><th>Mean for worst</th></tr>
 			{% for bws in best_v_worst_stats.keys() %}
-				<tr><td>{{bws}}</td><td>{{campaign_info[bws]}}</td><td>{{best_v_worst_stats[bws][1]}} / {{best_v_worst_stats[bws][0]}}</td></tr>
+				<tr><td>{{bws}}</td><td>{{campaign_info[bws]}}</td><td>{{'{:.1f}'.format(best_v_worst_stats[bws][0])}}</td><td>{{'{:.1f}'.format(best_v_worst_stats[bws][1])}}</td><td></td></tr>
 			{% endfor %}
 			</table>
 		</div>
@@ -31,14 +36,14 @@
 			</table>
 		</div>
 		<br><br>
-		<div class="form col-sm-6">
+		<div class="form col-sm-12">
 			<p>Most Similar Campaigns</p>
 			
 			{% for sc1,sc2 in sim_camps %}
 				<b>{{sc2['curator']}}</b> is creating {{sc2['creation_name']}}<br>
 			{% endfor %}
-		</div>
-		<div class="form col-sm-6">
+		</div><br><br>
+		<div class="form col-sm-12">
 			<p>Similar Successful Campaigns</p>
 			
 			{% for sc1,sc2 in closest_of_the_best %}

@@ -90,6 +90,44 @@ def get_quantile(comparison_campaigns,target):
 	return(sum(comparison_campaigns_pledges < int(target_pledge_sum))/len(comparison_campaigns_pledges))
 
 
+def get_all_recommendations(predictors, best, worst, target):
+
+	recommendations = []
+	bvw = best_v_worst_stats(predictors, best, worst)
+	
+	for key in bvw.keys():
+
+		# If the best campaign has more of something and the target campaign has less, then recommend more
+		if(bvw[key][0] > bvw[key][1]) and (bvw[key][0] > int(target.iloc[0][key])):
+
+			recommendations.append('{} ++'.format(key))
+
+		# Else if the best campaign has less of something and the target campaign has more, then recommend more
+		elif(bvw[key][0] < bvw[key][1]) and (bvw[key][0] < int(target.iloc[0][key])):
+
+			recommendations.append('{} --'.format(key))
+
+	if len(recommendations) == 0:
+		recommendations.append('We cannot offer any recommendations at this time.')
+
+	return(recommendations)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
