@@ -19,9 +19,9 @@ tc = analysis.topic_classifier.topic_classifier(
 	'model/lda_vectorizer.pickle',
 	'model/lda_vectorizer_tf.pickle')
 
-print('loading pre-processed data')
-ppdata = analysis.data_object.data_object(
-	'preprocessed_data_topics.csv')
+#print('loading pre-processed data')
+#ppdata = analysis.data_object.data_object(
+#	'preprocessed_data_topics.csv')
 
 ## ROUTING
 @app.route('/',methods=['GET','POST'])
@@ -62,7 +62,6 @@ def render_prediction(campaign_id):
 	## Pull the summary for analysis
 	print('preparing campaign {} summary text for LDA ...'.format(campaign_id))
 
-
 	## Tokenize the text
 	prepared_text = tokenizer.prepare_text_for_lda(entry.iloc[0]['summary'])
 	top_topics = tc.get_most_likely_topics(entry.iloc[0]['summary'],3,display=False)	
@@ -74,15 +73,22 @@ def render_prediction(campaign_id):
 	e = entry.join(topic_prob_df)
 
 	# Load a dataframe with a sample set of campaigns that can be used to compare to
+
+
+
+	num_campaigns = 291049
 	n_comp = 100000
-	all_campaigns = ppdata.get_dataframe()
-	inds = np.random.choice(len(all_campaigns), n_comp, replace=False)
+	#all_campaigns = ppdata.get_dataframe()
+	#inds = np.random.choice(len(all_campaigns), n_comp, replace=False)
 
-	# Create a target and comparison dataframe to compare topics
-	target = topic_probs
-	comparison = all_campaigns.iloc[inds]
+	# Grab a subset of the campaigns for now....
+	print('grabbing {} campaigns for comparison ...'.format(n_comp))
+	inds = sorted(np.random.choice(num_campaigns, num_campaigns - n_comp, replace=False))
+	comparison = pd.read_csv('preprocessed_data_topics.csv',header=0,skiprows=inds)
 
+	# Get the target probability distribution for the topics
 	print('getting sorted indices ...')
+	target = topic_probs
 	sorted_inds = analysis.pp_stats.get_sorted_indices_of_closest(target,comparison[topic_labels])
 	prediction_inds = [s[1] for s in sorted_inds[0:5]]
 
