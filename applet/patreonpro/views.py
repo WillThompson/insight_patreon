@@ -83,8 +83,8 @@ def render_prediction(campaign_id):
 
 	# Grab a subset of the campaigns for now....
 	print('grabbing {} campaigns for comparison ...'.format(n_comp))
-	inds = sorted(np.random.choice(num_campaigns, num_campaigns - n_comp, replace=False))
-	comparison = pd.read_csv('preprocessed_data_topics.csv',header=0,skiprows=inds)
+	inds = sorted(np.random.choice(np.arange(1,num_campaigns+1), num_campaigns - n_comp, replace=False))
+	comparison = pd.read_csv('preprocessed_data_topics.csv',skiprows=inds)
 
 	# Get the target probability distribution for the topics
 	print('getting sorted indices ...')
