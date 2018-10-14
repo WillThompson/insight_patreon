@@ -24,7 +24,7 @@ Thus, we can pass a new campaign into our TF-IDF vectorization scheme and traine
 
 Once we have determined the closest campaigns, we perform a quick regression analysis on the group to determine which factors are statistically significant for increased funding.
 
-![alt text](https://github.com/WillThompson/insight_patreon/blob/master/images/pp_flow_diagram.png | width=100)
+![alt text](https://github.com/WillThompson/insight_patreon/blob/master/images/pp_flow_diagram.png)
 
 ## Improvements
 
