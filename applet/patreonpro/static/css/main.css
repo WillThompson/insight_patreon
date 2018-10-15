@@ -69,6 +69,7 @@ div.jumbo {
 h1{
   font-family: 'Racing Sans One', cursive;
   font-size: 20pt;
+  color: #000000;
 }
 
 h2 {
@@ -110,8 +111,8 @@ h3 {
 }
 
 .btn-primary, .btn-primary:hover, .btn-primary:active, .btn-primary:visited, .btn-primary:focus {
-    border-color: #000000 !important; 
-    background-color: #000000!important;
+    border-color: #ff69b4 !important; 
+    background-color: #ff69b4!important;
     color: #ffffff !important;
 }
 

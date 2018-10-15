@@ -93,7 +93,7 @@ def render_prediction(campaign_id):
 	prediction_inds = [s[1] for s in sorted_inds[0:5]]
 
 	# Get the cloest campaigns 'similar campaigns'
-	n_compare = 3000
+	n_compare = 5000
 	distances, stats_inds = [p[0] for p in sorted_inds[:n_compare]],[p[1] for p in sorted_inds[:n_compare]]
 	similar_campaigns = comparison.iloc[stats_inds]
 	similar_campaigns['distance'] = distances
