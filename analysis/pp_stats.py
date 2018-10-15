@@ -16,7 +16,7 @@ def get_distance_between_dists(v1,v2):
 	return(jensen_shannon_distance(v1,v2))
 
 
-# Inputs: The target distribution. The Set of data to compare to.
+# Inputs: The target distribution. The set of data to compare to.
 # Outputs: The indices of the data that are 'closest' to the target
 def get_sorted_indices_of_closest(target,comparison):
 
@@ -44,6 +44,7 @@ def get_p_values_for_predictors(dataframe,predictors,target):
 	X = dataframe[predictors]
 	X = np.array(X).reshape(-1,len(predictors))
 
+	# Use linear regression. Review the assumptions later. This may not be the right model.
 	reg = sklearn.linear_model.LinearRegression()
 	reg.fit(X,y)
 
@@ -97,12 +98,12 @@ def get_all_recommendations(predictors, best, worst, target):
 	
 	for key in bvw.keys():
 
-		# If the best campaign has more of something and the target campaign has less, then recommend more
+		# If the best campaigns have more of something and the target campaign has less, then recommend more
 		if(bvw[key][0] > bvw[key][1]) and (bvw[key][0] > int(target.iloc[0][key])):
 
 			recommendations.append('{} ++'.format(key))
 
-		# Else if the best campaign has less of something and the target campaign has more, then recommend more
+		# Else if the best campaigns have less of something and the target campaign has more, then recommend less
 		elif(bvw[key][0] < bvw[key][1]) and (bvw[key][0] < int(target.iloc[0][key])):
 
 			recommendations.append('{} --'.format(key))
