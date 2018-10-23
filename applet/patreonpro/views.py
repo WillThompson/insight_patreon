@@ -11,6 +11,7 @@ import analysis.plots
 import analysis.pp_stats
 import tokenizer
 import scipy.stats as sp
+import pp_database as ppdb
 
 
 print('preparing topic classifier')
@@ -74,26 +75,22 @@ def render_prediction(campaign_id):
 
 	# Load a dataframe with a sample set of campaigns that can be used to compare to
 
-
-
-	num_campaigns = 291049
+	
 	n_comp = 100000
-	#all_campaigns = ppdata.get_dataframe()
-	#inds = np.random.choice(len(all_campaigns), n_comp, replace=False)
 
 	# Grab a subset of the campaigns for now....
 	print('grabbing {} campaigns for comparison ...'.format(n_comp))
-	inds = sorted(np.random.choice(np.arange(1,num_campaigns+1), num_campaigns - n_comp, replace=False))
-	comparison = pd.read_csv('preprocessed_data_topics.csv',skiprows=inds)
+	comparison = ppdb.get_random_sample(n_comp)
+
 
 	# Get the target probability distribution for the topics
 	print('getting sorted indices ...')
-	target = topic_probs
+	target = e[topic_labels]
 	sorted_inds = analysis.pp_stats.get_sorted_indices_of_closest(target,comparison[topic_labels])
 	prediction_inds = [s[1] for s in sorted_inds[0:5]]
 
-	# Get the cloest campaigns 'similar campaigns'
-	n_compare = 5000
+	# Get the closest campaigns 'similar campaigns'
+	n_compare = 10000
 	distances, stats_inds = [p[0] for p in sorted_inds[:n_compare]],[p[1] for p in sorted_inds[:n_compare]]
 	similar_campaigns = comparison.iloc[stats_inds]
 	similar_campaigns['distance'] = distances

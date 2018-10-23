@@ -24,7 +24,7 @@ def get_sorted_indices_of_closest(target,comparison):
 	dists_and_inds = [(0.0,0)]*len(comparison)
 
 	# Convert to a numpy array
-	v1 = np.array(target).astype('float')
+	v1 = np.array(target).astype('float')[0]
 
 	for k in range(0,len(comparison)):
 

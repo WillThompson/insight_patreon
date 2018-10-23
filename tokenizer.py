@@ -14,11 +14,10 @@ def get_lemma(word):
     else:
         return lemma
 
-from nltk.stem.wordnet import WordNetLemmatizer
-def get_lemma2(word):
-    return WordNetLemmatizer().lemmatize(word)
+#from nltk.stem.wordnet import WordNetLemmatizer
+#def get_lemma2(word):
+#    return WordNetLemmatizer().lemmatize(word)
 
-# Get the corpus of stop words from nltk and scikit learn
 
 # Define a function which will first tokenize the text appropriately.
 parser = English()
