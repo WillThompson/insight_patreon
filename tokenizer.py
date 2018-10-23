@@ -3,6 +3,7 @@ import nltk
 from spacy.lang.en import English
 import data_cleaner
 import string
+import re
 
 
 # Create a Lemmatizer
@@ -14,13 +15,22 @@ def get_lemma(word):
     else:
         return lemma
 
+# Clean out html tags, etc from the summary
+def clean_text(text):
+    
+    # Remove the html tags
+    html_tag_regex = '<[^<]+?>'
+    new_text = re.sub(html_tag_regex,' ',text).strip()
+    
+    return new_text
+
 # Define a function which will first tokenize the text appropriately.
 parser = English()
 def tokenize(text):
     lda_tokens = []
     
     # Remove the html tags
-    new_text = data_cleaner.clean_text(text)
+    new_text = clean_text(text)
     tokens = parser(new_text) 
     
     for token in tokens:
